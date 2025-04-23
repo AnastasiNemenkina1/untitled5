@@ -16,7 +16,10 @@ dependencies {
 test {
     useJUnitPlatform()
     systemProperty "file.encoding", "UTF-8"
-}
 
-// Добавьте это в конец файла (без отступа)
-System.setProperty("file.encoding", "UTF-8")
+    testLogging {
+        events "passed", "skipped", "failed"
+        showStandardStreams = true
+        exceptionFormat "full"
+    }
+}

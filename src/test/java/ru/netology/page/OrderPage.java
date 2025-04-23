@@ -1,9 +1,7 @@
 package ru.netology.page;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.*;
+import org.openqa.selenium.support.ui.*;
 import java.time.Duration;
 
 public class OrderPage {
@@ -15,6 +13,7 @@ public class OrderPage {
     private final By phoneField = By.cssSelector("[data-test-id=phone] input");
     private final By agreementCheckbox = By.cssSelector("[data-test-id=agreement]");
     private final By submitButton = By.cssSelector("[data-test-id=submit]");
+    private final By successNotification = By.cssSelector("[data-test-id=success-notification]");
 
     public OrderPage(WebDriver driver) {
         this.driver = driver;
@@ -22,18 +21,38 @@ public class OrderPage {
     }
 
     public void fillName(String name) {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(nameField)).sendKeys(name);
+        System.out.println("Заполняем поле 'Имя': " + name);
+        WebElement element = wait.until(ExpectedConditions.visibilityOfElementLocated(nameField));
+        element.clear();
+        element.sendKeys(name);
     }
 
     public void fillPhone(String phone) {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(phoneField)).sendKeys(phone);
+        System.out.println("Заполняем поле 'Телефон': " + phone);
+        WebElement element = wait.until(ExpectedConditions.visibilityOfElementLocated(phoneField));
+        element.clear();
+        element.sendKeys(phone);
     }
 
     public void checkAgreement() {
-        wait.until(ExpectedConditions.elementToBeClickable(agreementCheckbox)).click();
+        System.out.println("Отмечаем чекбокс согласия");
+        WebElement checkbox = wait.until(ExpectedConditions.elementToBeClickable(agreementCheckbox));
+        if (!checkbox.isSelected()) {
+            checkbox.click();
+        }
     }
 
     public void submit() {
+        System.out.println("Нажимаем кнопку отправки");
         wait.until(ExpectedConditions.elementToBeClickable(submitButton)).click();
+    }
+
+    public boolean isSuccessNotificationVisible() {
+        try {
+            return wait.until(ExpectedConditions.visibilityOfElementLocated(successNotification)).isDisplayed();
+        } catch (TimeoutException e) {
+            System.out.println("Уведомление об успехе не появилось");
+            return false;
+        }
     }
 }
