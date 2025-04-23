@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
-class AppOrderTestNegativeTest {
+class OrderPage {
     private WebDriver driver;
 
     @BeforeAll
