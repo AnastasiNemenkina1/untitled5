@@ -3,11 +3,13 @@ package ru.netology.page;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import java.time.Duration;
 
 public class OrderPage {
     private final WebDriver driver;
     private final WebDriverWait wait;
 
+    // Локаторы элементов
     private final By nameLocator = By.cssSelector("[data-test-id=name] input");
     private final By phoneLocator = By.cssSelector("[data-test-id=phone] input");
     private final By cityLocator = By.cssSelector("[data-test-id=city] input");
@@ -18,38 +20,34 @@ public class OrderPage {
     private final By phoneError = By.cssSelector("[data-test-id=phone].input_invalid .input__sub");
     private final By agreementError = By.cssSelector("[data-test-id=agreement].input_invalid");
 
-    public OrderPage(WebDriver driver, WebDriverWait wait) {
+    public OrderPage(WebDriver driver) {
         this.driver = driver;
-        this.wait = wait;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(15));
     }
 
     public void fillName(String name) {
-        WebElement field = wait.until(ExpectedConditions.visibilityOfElementLocated(nameLocator));
-        field.clear();
-        field.sendKeys(name);
+        driver.findElement(nameLocator).clear();
+        driver.findElement(nameLocator).sendKeys(name);
     }
 
     public void fillPhone(String phone) {
-        WebElement field = wait.until(ExpectedConditions.visibilityOfElementLocated(phoneLocator));
-        field.clear();
-        field.sendKeys(phone);
+        driver.findElement(phoneLocator).clear();
+        driver.findElement(phoneLocator).sendKeys(phone);
     }
 
     public void fillCity(String city) {
-        WebElement field = wait.until(ExpectedConditions.visibilityOfElementLocated(cityLocator));
-        field.clear();
-        field.sendKeys(city);
+        driver.findElement(cityLocator).clear();
+        driver.findElement(cityLocator).sendKeys(city);
     }
 
     public void checkAgreement() {
-        WebElement checkbox = wait.until(ExpectedConditions.elementToBeClickable(agreementLocator));
-        if (!checkbox.isSelected()) {
-            checkbox.click();
+        if (!driver.findElement(agreementLocator).isSelected()) {
+            driver.findElement(agreementLocator).click();
         }
     }
 
     public void submit() {
-        wait.until(ExpectedConditions.elementToBeClickable(submitButton)).click();
+        driver.findElement(submitButton).click();
     }
 
     public String getSuccessMessage() {
@@ -65,7 +63,6 @@ public class OrderPage {
     }
 
     public String getAgreementError() {
-        return wait.until(ExpectedConditions.visibilityOfElementLocated(agreementError))
-                .getAttribute("validationMessage");
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(agreementError)).getText();
     }
 }

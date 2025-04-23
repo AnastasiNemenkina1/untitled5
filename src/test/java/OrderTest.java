@@ -2,26 +2,20 @@ package ru.netology;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.*;
-import org.openqa.selenium.*;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import ru.netology.page.OrderPage;
-
 import java.time.Duration;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class OrderTest {
     private static WebDriver driver;
     private static OrderPage orderPage;
-    private static WebDriverWait wait;
 
     @BeforeAll
     static void setupAll() {
         WebDriverManager.chromedriver().setup();
-
         ChromeOptions options = new ChromeOptions();
         options.addArguments(
                 "--start-maximized",
@@ -29,69 +23,82 @@ class OrderTest {
                 "--disable-dev-shm-usage",
                 "--no-sandbox"
         );
-
         driver = new ChromeDriver(options);
-        wait = new WebDriverWait(driver, Duration.ofSeconds(15));
-        orderPage = new OrderPage(driver, wait);
+        orderPage = new OrderPage(driver);
     }
 
+    @BeforeEach
+    void setup() {
+        driver.get("http://localhost:9999");
+    }
+
+    // Позитивный тест
     @Test
+    @DisplayName("Успешная отправка формы с валидными данными")
     void shouldSubmitValidForm() {
-        driver.get("http://localhost:9999");
-
-        orderPage.fillName("Иванов Иван");
+        orderPage.fillName("Иванов-Петров Иван");
         orderPage.fillPhone("+79270000000");
         orderPage.fillCity("Москва");
         orderPage.checkAgreement();
         orderPage.submit();
 
-        String successText = orderPage.getSuccessMessage();
-        assertTrue(successText.contains("Успешно"));
+        String actual = orderPage.getSuccessMessage();
+        assertTrue(actual.contains("Успешно"),
+                "Фактический результат: " + actual);
     }
 
+    // Тесты валидации имени
     @Test
-    void shouldShowErrorForInvalidName() {
-        driver.get("http://localhost:9999");
-        orderPage.fillName("Ivanov Ivan"); // Английские буквы
-        orderPage.fillPhone("+79270000000");
-        orderPage.fillCity("Москва");
-        orderPage.checkAgreement();
+    @DisplayName("Ошибка при вводе имени латиницей")
+    void shouldShowErrorForLatinName() {
+        orderPage.fillName("Ivanov Ivan");
         orderPage.submit();
-
-        String errorText = orderPage.getNameError();
-        assertTrue(errorText.contains("Допустимы только русские буквы"));
+        assertEquals("Допустимы только русские буквы, пробелы и дефисы",
+                orderPage.getNameError());
     }
 
     @Test
-    void shouldShowErrorForInvalidPhone() {
-        driver.get("http://localhost:9999");
-        orderPage.fillName("Иванов Иван");
-        orderPage.fillPhone("79270000000"); // Нет +
-        orderPage.fillCity("Москва");
-        orderPage.checkAgreement();
+    @DisplayName("Ошибка при пустом поле имени")
+    void shouldShowErrorForEmptyName() {
+        orderPage.fillName("");
         orderPage.submit();
+        assertEquals("Поле обязательно для заполнения",
+                orderPage.getNameError());
+    }
 
-        String errorText = orderPage.getPhoneError();
-        assertTrue(errorText.contains("Телефон указан неверно"));
+    // Тесты валидации телефона
+    @Test
+    @DisplayName("Ошибка при отсутствии + в телефоне")
+    void shouldShowErrorForPhoneWithoutPlus() {
+        orderPage.fillPhone("79270000000");
+        orderPage.submit();
+        assertEquals("Телефон указан неверно. Должно быть 11 цифр, например, +79012345678",
+                orderPage.getPhoneError());
     }
 
     @Test
+    @DisplayName("Ошибка при коротком номере телефона")
+    void shouldShowErrorForShortPhone() {
+        orderPage.fillPhone("+79270000");
+        orderPage.submit();
+        assertEquals("Телефон указан неверно. Должно быть 11 цифр, например, +79012345678",
+                orderPage.getPhoneError());
+    }
+
+    // Тест согласия
+    @Test
+    @DisplayName("Ошибка при отсутствии согласия")
     void shouldShowErrorForUncheckedAgreement() {
-        driver.get("http://localhost:9999");
         orderPage.fillName("Иванов Иван");
         orderPage.fillPhone("+79270000000");
         orderPage.fillCity("Москва");
-        // Чекбокс не отмечаем специально
+        // Чекбокс не отмечаем
         orderPage.submit();
-
-        String errorText = orderPage.getAgreementError();
-        assertTrue(errorText.contains("Необходимо согласие"));
+        assertTrue(orderPage.getAgreementError().contains("Необходимо согласие"));
     }
 
     @AfterAll
     static void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
+        driver.quit();
     }
 }
