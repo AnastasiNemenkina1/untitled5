@@ -1,85 +1,51 @@
-mport io.github.bonigarcia.wdm.WebDriverManager;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+package ru.netology.pages;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
+public class OrderPage {
+    private final WebDriver driver;
 
-class OrderPage {
-    private WebDriver driver;
+    private final By nameInput = By.cssSelector("[data-test-id=name] input");
+    private final By phoneInput = By.cssSelector("[data-test-id=phone] input");
+    private final By agreementCheckbox = By.cssSelector("[data-test-id=agreement]");
+    private final By submitButton = By.cssSelector("[data-test-id=submit]");
+    private final By successMessage = By.cssSelector("[data-test-id=success-message]");
+    private final By errorMessage = By.cssSelector("[data-test-id=error-message]");
 
-    @BeforeAll
-    static void setUpAll() {WebDriverManager.chromedriver().setup();}
-
-    @BeforeEach
-    public void beforeEach(){
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--disable-dev-shm-usage");
-        options.addArguments("--no-sandbox");
-        options.addArguments("--headless");
-        driver = new ChromeDriver(options);
+    public OrderPage(WebDriver driver) {
+        this.driver = driver;
     }
 
-    @AfterEach
-    void tearDowd() {
-        driver.quit();
-        driver = null;
+    public void fillName(String name) {
+        driver.findElement(nameInput).sendKeys(name);
     }
 
-    @Test
-    void sendingFormTestWithInvalidName() throws InterruptedException {
-        driver.get("http://localhost:9999/");
-        driver.findElement(By.cssSelector("[data-test-id=name] input")).sendKeys("Anastasia Gavrina");
-        driver.findElement(By.cssSelector("[data-test-id=phone] input")).sendKeys("+79290262155");
-        driver.findElement(By.cssSelector("[data-test-id='agreement']")).click();
-        driver.findElement(By.cssSelector("button.button")).click();
-        String text = driver.findElement(By.cssSelector("[data-test-id='name'].input_invalid .input__sub" )).getText();
-        assertEquals("Имя и Фамилия указаные неверно. Допустимы только русские буквы, пробелы и дефисы.", text);
+    public void fillPhone(String phone) {
+        driver.findElement(phoneInput).sendKeys(phone);
     }
 
-    @Test
-    void sendingFormTestWithoutName() throws InterruptedException {
-        driver.get("http://localhost:9999/");
-        driver.findElement(By.cssSelector("[data-test-id=phone] input")).sendKeys("+79290262155");
-        driver.findElement(By.cssSelector("[data-test-id='agreement']")).click();
-        driver.findElement(By.cssSelector("button.button")).click();
-        String text = driver.findElement(By.cssSelector("[data-test-id='name'].input_invalid .input__sub" )).getText();
-        assertEquals("Поле обязательно для заполнения", text);
+    public void checkAgreement() {
+        driver.findElement(agreementCheckbox).click();
     }
 
-    @Test
-    void sendingFormTestWithOutPhoneNumber() throws InterruptedException {
-        driver.get("http://localhost:9999/");
-        driver.findElement(By.cssSelector("[data-test-id=name] input")).sendKeys("Анастасия Гаврина");
-        driver.findElement(By.cssSelector("[data-test-id='agreement']")).click();
-        driver.findElement(By.cssSelector("button.button")).click();
-        String text = driver.findElement(By.cssSelector("[data-test-id='phone'].input_invalid .input__sub" )).getText();
-        assertEquals("Поле обязательно для заполнения", text);
+    public void submit() {
+        driver.findElement(submitButton).click();
     }
 
-    @Test
-    void sendingFormTestWithInvalidPhoneNumber() throws InterruptedException {
-        driver.get("http://localhost:9999/");
-        driver.findElement(By.cssSelector("[data-test-id=name] input")).sendKeys("Анастасия Гаврина");
-        driver.findElement(By.cssSelector("[data-test-id=phone] input")).sendKeys("Phone number");
-        driver.findElement(By.cssSelector("[data-test-id='agreement']")).click();
-        driver.findElement(By.cssSelector("button.button")).click();
-        String text = driver.findElement(By.cssSelector("[data-test-id='phone'].input_invalid .input__sub" )).getText();
-        assertEquals("Телефон указан неверно. Должно быть 11 цифр, например, +79290262155.", text);
+    public String getSuccessMessage() {
+        return driver.findElement(successMessage).getText().trim();
     }
 
-    @Test
-    void sendingFormTestWithOutCheckBox() throws InterruptedException {
-        driver.get("http://localhost:9999/");
-        driver.findElement(By.cssSelector("[data-test-id=name] input")).sendKeys("Анастасия Гаврина");
-        driver.findElement(By.cssSelector("[data-test-id=phone] input")).sendKeys("+79290262155");
-        driver.findElement(By.cssSelector("button.button")).click();
-        assertTrue (driver.findElement(By.cssSelector("[data-test-id='agreement'].input_invalid" )).isDisplayed());
+    public String getErrorMessage() {
+        return driver.findElement(errorMessage).getText().trim();
     }
 }
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import java.time.Duration;
+
+public void submit() {
+    new WebDriverWait(driver, Duration.ofSeconds(5))
+            .until(ExpectedConditions.elementToBeClickable(submitButton))
+            .click();
