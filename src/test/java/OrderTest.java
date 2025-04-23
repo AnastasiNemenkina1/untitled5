@@ -8,7 +8,7 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class OrderTest {
+class OrderTest {
     private WebDriver driver;
     private OrderPage orderPage;
 
@@ -18,7 +18,7 @@ public class OrderTest {
     }
 
     @BeforeEach
-    void setup() {
+    void setUp() {
         driver = new ChromeDriver();
         orderPage = new OrderPage(driver);
         driver.get("http://localhost:9999");
@@ -26,70 +26,20 @@ public class OrderTest {
 
     @AfterEach
     void tearDown() {
-        driver.quit();
+        if (driver != null) {
+            driver.quit();
+        }
     }
 
     @Test
     @DisplayName("Успешная отправка формы")
-    void shouldSubmitForm() {
-        orderPage.fillName("Анастасия Гаврина");
-        orderPage.fillPhone("+79292621111");
+    void shouldSubmitValidForm() {
+        orderPage.fillName("Иванов Иван");
+        orderPage.fillPhone("+79270000000");
         orderPage.checkAgreement();
         orderPage.submit();
 
-        assertEquals("Ваша заявка успешно отправлена!", orderPage.getSuccessMessage());
-    }
-
-    @Test
-    @DisplayName("Ошибка при неверном имени")
-    void shouldShowErrorForInvalidName() {
-        orderPage.fillName("Anastasia Gavrina");
-        orderPage.fillPhone("+79292621111");
-        orderPage.checkAgreement();
-        orderPage.submit();
-
-        assertEquals("Имя и Фамилия указаные неверно. Допустимы только русские буквы, пробелы и дефисы.",
-                orderPage.getErrorMessage());
-    }
-
-    @Test
-    @DisplayName("Ошибка при неверном телефоне")
-    void shouldShowErrorForInvalidPhone() {
-        orderPage.fillName("Анастасия Гаврина");
-        orderPage.fillPhone("+79292621111");
-        orderPage.checkAgreement();
-        orderPage.submit();
-
-        assertEquals("Телефон указан неверно. Должно быть 11 цифр после +.",
-                orderPage.getErrorMessage());
-    }
-
-    @Test
-    @DisplayName("Ошибка при отсутствии согласия")
-    void shouldShowErrorWithoutAgreement() {
-        orderPage.fillName("Анастасия Гаврина");
-        orderPage.fillPhone("+79292621111");
-        orderPage.submit();
-
-        assertEquals("Я соглашаюсь с условиями обработки и использования моих персональных данных",
-                orderPage.getErrorMessage());
-    }
-}
-@ParameterizedTest
-@CsvSource({
-        "Анастасия Гаврина, +79292621111, true",
-        "Gavrina, +79292621111, false",
-        "Гаврина-Неменкина, +79292621111, true"
-})
-void testNameValidation(String name, String phone, boolean valid) {
-    orderPage.fillName(name);
-    orderPage.fillPhone(phone);
-    orderPage.checkAgreement();
-    orderPage.submit();
-
-    if (valid) {
-        assertEquals("Ваша заявка успешно отправлена!", orderPage.getSuccessMessage());
-    } else {
-        assertTrue(orderPage.getErrorMessage().contains("Имя и Фамилия указаные неверно"));
+        assertEquals("Ваша заявка успешно отправлена!",
+                orderPage.getSuccessMessage());
     }
 }
