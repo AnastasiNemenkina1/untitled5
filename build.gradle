@@ -1,0 +1,26 @@
+plugins {
+    id 'java' // Обязательно добавляем Java-плагин
+    id 'application' // Дополнительно (если нужно)
+}
+
+repositories {
+    mavenCentral() // Включаем репозиторий
+}
+
+dependencies {
+    // Правильный формат зависимостей:
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
+
+    // Пример других зависимостей:
+    implementation 'org.seleniumhq.selenium:selenium-java:4.20.0'
+    implementation 'io.github.bonigarcia:webdrivermanager:5.8.0'
+}
+
+test {
+    useJUnitPlatform() // Включаем JUnit 5
+}
+
+application {
+    mainClass = 'ru.netology.Main' // Укажите ваш главный класс
+}
