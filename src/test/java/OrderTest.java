@@ -34,7 +34,7 @@ class OrderTest {
     @Test
     @DisplayName("Успешная отправка формы")
     void shouldSubmitValidForm() {
-        orderPage.fillName("Иванов Иван");
+        orderPage.fillName("Ивано Иван");
         orderPage.fillPhone("+79270000000");
         orderPage.checkAgreement();
         orderPage.submit();
