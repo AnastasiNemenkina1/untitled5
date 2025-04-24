@@ -18,15 +18,16 @@ jobs:
       - name: Install Firefox
         run: sudo apt-get install -y firefox
 
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
       - name: Start SUT
         run: java -jar ./artifacts/app-order.jar &
         
       - name: Run tests with Gradle
         run: ./gradlew test --info
         env:
-          # Указываем headless режим для Firefox
           MOZ_HEADLESS: 1
-          # Для WebDriverManager можно указать:
           WDM_GECKODRIVERVERSION: latest
           WDM_ARCHITECTURE: 64
     
