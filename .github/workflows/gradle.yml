@@ -15,24 +15,33 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
       
-      - name: Install Firefox (alternative)
+      - name: Install Chrome
         run: |
-          sudo add-apt-repository ppa:mozillateam/ppa -y
           sudo apt-get update
-          sudo apt-get install -y firefox-esr
-          firefox --version
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
 
       - name: Make gradlew executable
         run: chmod +x gradlew
 
-      - name: Start SUT
-        run: java -jar ./artifacts/app-order.jar &
+      - name: Start and verify SUT
+        run: |
+          java -jar ./artifacts/app-order.jar &
+          sleep 5
+          curl -v http://localhost:9999
         
       - name: Run tests with Gradle
         run: ./gradlew test --info
         env:
-          MOZ_HEADLESS: 1
-          WDM_GECKODRIVERVERSION: latest
-          WDM_ARCHITECTURE: 64
-    
-  
+          WDM_PROGRESSBAR: 0
+          WDM_PRINTCHROMEDRIVEROUTPUT: 1
+          WDM_LOCAL: 1
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-reports
+          path: |
+            build/reports/tests/
+            build/test-results/
