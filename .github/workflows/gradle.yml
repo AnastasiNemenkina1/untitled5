@@ -15,8 +15,12 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
       
-      - name: Install Firefox
-        run: sudo apt-get install -y firefox
+      - name: Install Firefox (alternative)
+        run: |
+          sudo add-apt-repository ppa:mozillateam/ppa -y
+          sudo apt-get update
+          sudo apt-get install -y firefox-esr
+          firefox --version
 
       - name: Make gradlew executable
         run: chmod +x gradlew
