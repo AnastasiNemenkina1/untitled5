@@ -15,38 +15,39 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
       
-      - name: Install Firefox (ESR version)
+      - name: Setup Firefox
         run: |
-          sudo add-apt-repository ppa:mozillateam/ppa -y
-          sudo apt-get update
-          sudo apt-get install -y firefox-esr
-          firefox-esr --version
+          sudo apt-get remove -y firefox
+          wget -O firefox.tar.bz2 "https://download.mozilla.org/?product=firefox-latest&os=linux64&lang=en-US"
+          sudo tar xjf firefox.tar.bz2 -C /opt
+          sudo ln -sf /opt/firefox/firefox /usr/local/bin/firefox
+          firefox --version
 
-      - name: Install GeckoDriver
+      - name: Setup GeckoDriver
         run: |
-          sudo apt-get install -y wget
           GECKO_VERSION=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest | grep tag_name | cut -d '"' -f 4)
           wget https://github.com/mozilla/geckodriver/releases/download/${GECKO_VERSION}/geckodriver-${GECKO_VERSION}-linux64.tar.gz
           sudo tar -xzf geckodriver-*.tar.gz -C /usr/local/bin
+          sudo chmod +x /usr/local/bin/geckodriver
           geckodriver --version
 
       - name: Make gradlew executable
         run: chmod +x gradlew
 
-      - name: Start and verify SUT
+      - name: Start SUT
         run: |
           java -jar ./artifacts/app-order.jar &
           sleep 5
-          curl -v http://localhost:9999 || echo "SUT may not be responding"
-        
-      - name: Run tests with Gradle
+          curl -v http://localhost:9999 || echo "SUT check failed but continuing..."
+
+      - name: Run tests
         run: ./gradlew test --info
         env:
           MOZ_HEADLESS: 1
-          FIREFOX_BIN: /usr/bin/firefox-esr
-          GECKODRIVER_PATH: /usr/local/bin/geckodriver
+          FIREFOX_BIN: /opt/firefox/firefox
+          webdriver.gecko.driver: /usr/local/bin/geckodriver
 
-      - name: Upload test reports
+      - name: Upload reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
