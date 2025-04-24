@@ -20,17 +20,17 @@ jobs:
           # Удаляем все существующие версии
           sudo apt-get remove -y firefox*
           
-          # Скачиваем официальную сборку Firefox
-          wget -O firefox.tar.bz2 "https://download.mozilla.org/?product=firefox-latest-ssl&os=linux64&lang=en-US"
-          file firefox.tar.bz2  # Проверяем тип файла
+          # Скачиваем официальную сборку Firefox (теперь в формате .tar.xz)
+          wget -O firefox.tar.xz "https://download.mozilla.org/?product=firefox-latest-ssl&os=linux64&lang=en-US"
+          file firefox.tar.xz  # Проверяем тип файла
           
-          # Создаем директорию и распаковываем
+          # Создаем директорию и распаковываем с правильными параметрами
           sudo mkdir -p /opt/firefox
-          sudo tar -xjf firefox.tar.bz2 -C /opt
+          sudo tar -xJf firefox.tar.xz -C /opt
           
           # Создаем симлинк
           sudo ln -sf /opt/firefox/firefox /usr/local/bin/firefox
-          firefox --version
+          /opt/firefox/firefox --version
 
       - name: Install GeckoDriver
         run: |
