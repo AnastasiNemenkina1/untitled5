@@ -15,16 +15,26 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
       
-      - name: Setup Firefox
+      - name: Install Firefox (correct method)
         run: |
-          sudo apt-get remove -y firefox
-          wget -O firefox.tar.bz2 "https://download.mozilla.org/?product=firefox-latest&os=linux64&lang=en-US"
-          sudo tar xjf firefox.tar.bz2 -C /opt
+          # Удаляем все существующие версии
+          sudo apt-get remove -y firefox*
+          
+          # Скачиваем официальную сборку Firefox
+          wget -O firefox.tar.bz2 "https://download.mozilla.org/?product=firefox-latest-ssl&os=linux64&lang=en-US"
+          file firefox.tar.bz2  # Проверяем тип файла
+          
+          # Создаем директорию и распаковываем
+          sudo mkdir -p /opt/firefox
+          sudo tar -xjf firefox.tar.bz2 -C /opt
+          
+          # Создаем симлинк
           sudo ln -sf /opt/firefox/firefox /usr/local/bin/firefox
           firefox --version
 
-      - name: Setup GeckoDriver
+      - name: Install GeckoDriver
         run: |
+          sudo apt-get install -y wget
           GECKO_VERSION=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest | grep tag_name | cut -d '"' -f 4)
           wget https://github.com/mozilla/geckodriver/releases/download/${GECKO_VERSION}/geckodriver-${GECKO_VERSION}-linux64.tar.gz
           sudo tar -xzf geckodriver-*.tar.gz -C /usr/local/bin
@@ -37,8 +47,8 @@ jobs:
       - name: Start SUT
         run: |
           java -jar ./artifacts/app-order.jar &
-          sleep 5
-          curl -v http://localhost:9999 || echo "SUT check failed but continuing..."
+          sleep 10
+          curl -v http://localhost:9999 || echo "SUT check skipped"
 
       - name: Run tests
         run: ./gradlew test --info
@@ -47,7 +57,7 @@ jobs:
           FIREFOX_BIN: /opt/firefox/firefox
           webdriver.gecko.driver: /usr/local/bin/geckodriver
 
-      - name: Upload reports
+      - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
